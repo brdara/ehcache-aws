@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.xarixa.ehcache.aws</groupId>
 	<artifactId>aws-ehcache-discovery</artifactId>
-	<version>0.1-SNAPSHOT</version>
+	<version>0.1</version>
 	<name>AWS EhCache Discovery</name>
 	<description>Discovery mechanism for EhCache across AWS environments where UDP is not available</description>
 	<packaging>jar</packaging>
