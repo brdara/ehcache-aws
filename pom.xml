@@ -1,0 +1,189 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.xarixa.ehcache.aws</groupId>
+	<artifactId>aws-ehcache-discovery</artifactId>
+	<version>0.1-SNAPSHOT</version>
+	<name>AWS EhCache Discovery</name>
+	<description>Discovery mechanism for EhCache across AWS environments where UDP is not available</description>
+	<packaging>jar</packaging>
+
+	<properties>
+		<slf4j.version>1.7.7</slf4j.version>
+		<jmock.version>2.5.1</jmock.version>
+		<junit.version>4.9</junit.version>
+		
+		<!-- Set to true on the command line to skip the integration tests.
+			An AWS account is required for the integration tests, see below.
+		-->
+		<skipIntegrationTests>false</skipIntegrationTests>
+
+		<!--
+			Set this property on the command line to set up your own properties file which contains
+			accessKey and secretKey to be used in the integration tests.
+			The AwsSecurityGroupAwareDiscoveryServiceIntegrationTest sets up a security group and AWS
+			instances to check that the security group can be read.
+		-->
+		<awsIdentifyFile>/Work/aws-development.properties</awsIdentifyFile>
+	</properties>
+
+	<repositories>
+		<repository>
+			<id>maven-central</id>
+			<url>http://central.maven.org/maven2/</url>
+		</repository>
+		<repository>
+			<id>jboss</id>
+			<url>https://repository.jboss.org/nexus</url>
+		</repository>
+	</repositories>
+
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-antrun-plugin</artifactId>
+					<version>1.6</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>3.2</version>
+					<configuration>
+						<source>1.7</source>
+						<target>1.7</target>
+					</configuration>
+				</plugin>
+
+				<!-- Configure surefire to run integration tests in the verify phase 
+					only -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>2.18</version>
+					<configuration>
+						<argLine>-Dcom.xarixa.ehcache.aws.AwsIdentifyFile=${awsIdentifyFile}</argLine>
+					</configuration>
+					<executions>
+						<execution>
+							<id>unit-tests</id>
+							<phase>test</phase>
+							<goals>
+								<goal>test</goal>
+							</goals>
+							<configuration>
+								<skip>${skipUnitTests}</skip>
+								<excludes>
+									<exclude>**/Abstract*IntegrationTest.java</exclude>
+									<exclude>**/*IntegrationTest.java</exclude>
+									<exclude>**/*PerformanceTest.java</exclude>
+								</excludes>
+							</configuration>
+						</execution>
+						<execution>
+							<id>integration-tests</id>
+							<phase>integration-test</phase>
+							<goals>
+								<goal>test</goal>
+							</goals>
+							<configuration>
+								<skip>${skipIntegrationTests}</skip>
+								<excludes>
+									<exclude>**/Abstract*IntegrationTest.java</exclude>
+								</excludes>
+								<includes>
+									<include>**/*IntegrationTest.java</include>
+								</includes>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+
+	<dependencies>
+
+		<!-- Test dependencies -->
+		<dependency>
+			<artifactId>junit</artifactId>
+			<groupId>junit</groupId>
+			<version>${junit.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jmock</groupId>
+			<artifactId>jmock</artifactId>
+			<version>${jmock.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jmock</groupId>
+			<artifactId>jmock-junit4</artifactId>
+			<version>${jmock.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jmock</groupId>
+			<artifactId>jmock-legacy</artifactId>
+			<version>${jmock.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.powermock</groupId>
+			<artifactId>powermock-reflect</artifactId>
+			<version>1.5</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.carrotsearch</groupId>
+			<artifactId>junit-benchmarks</artifactId>
+			<version>0.7.2</version>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- Log dependencies -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>${slf4j.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>${slf4j.version}</version>
+		</dependency>
+		
+		<!-- EhCache -->
+		<dependency>
+			<groupId>net.sf.ehcache</groupId>
+			<artifactId>ehcache</artifactId>
+			<version>2.9.0</version>
+		</dependency>
+		
+		<!-- Misc -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.3.2</version>
+		</dependency>
+		
+		<!-- JClouds -->
+		<dependency>
+			<groupId>org.apache.jclouds</groupId>
+			<artifactId>jclouds-all</artifactId>
+			<version>1.8.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.jclouds.driver</groupId>
+			<artifactId>jclouds-sshj</artifactId>
+			<version>1.8.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.jclouds.driver</groupId>
+			<artifactId>jclouds-slf4j</artifactId>
+			<version>1.8.1</version>
+		</dependency>
+	</dependencies>
+</project>

@@ -1,0 +1,47 @@
+<ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ehcache.xsd" name="ehcache-2">
+	<diskStore path="/tmp" />
+	<!--
+		In the tests we change the discoveryPort for each service. In reality this will be the same
+		on all of the servers in the cluster, and discoveryServers will be set to a different host
+		and the same port.
+	-->
+	<cacheManagerPeerProviderFactory
+		class="com.xarixa.ehcache.aws.AwsSecurityGroupAwareCacheManagerPeerProviderFactory"
+		properties="securityGroup=sg-12378-ag,securityGroupRefreshInterval=10000,discoveryServiceClass=com.xarixa.ehcache.aws.SimpleDiscoveryServiceFactory"
+		propertySeparator=","/>
+
+	<cacheManagerPeerListenerFactory
+		class="net.sf.ehcache.distribution.RMICacheManagerPeerListenerFactory"
+		properties="port=61618,socketTimeoutMillis=10000"/>
+
+	<defaultCache
+		maxElementsInMemory="10000"
+		eternal="false"
+        timeToIdleSeconds="600"
+		overflowToDisk="false">
+        <cacheEventListenerFactory
+			class="net.sf.ehcache.distribution.RMICacheReplicatorFactory"
+			properties="replicatePuts=true,replicateUpdatesViaCopy=true"
+			propertySeparator=","/>
+		<!-- Set up to bootstrap before the cache can be started -->
+	    <bootstrapCacheLoaderFactory
+	        class="net.sf.ehcache.distribution.RMIBootstrapCacheLoaderFactory"
+	        properties="bootstrapAsynchronously=false, maximumChunkSizeBytes=5242880"/>
+	</defaultCache>
+
+	<cache
+		name="com.xarixa.ehcache.aws.Testing"
+		maxElementsInMemory="10000"
+		eternal="false"
+        timeToIdleSeconds="600"
+		overflowToDisk="false">
+        <cacheEventListenerFactory
+			class="net.sf.ehcache.distribution.RMICacheReplicatorFactory"
+			properties="replicateAsynchronously=false,replicatePuts=true,replicateUpdatesViaCopy=true"
+			propertySeparator=","/>
+		<!-- Set up to bootstrap before the cache can be started -->
+	    <bootstrapCacheLoaderFactory
+	        class="net.sf.ehcache.distribution.RMIBootstrapCacheLoaderFactory"
+	        properties="bootstrapAsynchronously=false, maximumChunkSizeBytes=5242880"/>
+	</cache>
+</ehcache>
