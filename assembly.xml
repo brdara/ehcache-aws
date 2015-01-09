@@ -1,0 +1,25 @@
+<assembly>
+  <id>puppet</id>
+  <formats>
+    <format>zip</format>
+    <format>dir</format>
+  </formats>
+  <includeBaseDirectory>false</includeBaseDirectory>
+  <fileSets>
+    <fileSet>
+      <directory>.</directory>
+      <lineEnding>keep</lineEnding>
+      <outputDirectory>.</outputDirectory>
+      <includes>
+        <include>target/jar-dependencies/**</include>
+      </includes>
+    </fileSet>
+  </fileSets>
+ <dependencySets>
+    <dependencySet>
+      <useProjectArtifact>false</useProjectArtifact>
+      <useTransitiveDependencies>false</useTransitiveDependencies>
+      <outputDirectory>.</outputDirectory>
+    </dependencySet>
+  </dependencySets>
+</assembly>
