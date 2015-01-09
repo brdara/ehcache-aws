@@ -39,7 +39,7 @@ import com.xarixa.ehcache.aws.discovery.DiscoveryService;
 import com.xarixa.ehcache.aws.discovery.DiscoveryServiceConfig;
 import com.xarixa.ehcache.aws.discovery.DiscoveryServiceFactory;
 
-public class AwsSecurityGroupAwareCacheManagerPeerProvider extends RMICacheManagerPeerProvider implements ManagedCacheManagerPeerProvider, UpdateableHostBasedCacheManagerPeerProvider {
+public class AwsSecurityGroupAwareCacheManagerPeerProvider extends RMICacheManagerPeerProvider implements ManagedCacheManagerPeerProvider, UpdateableHostBasedCacheManagerPeerProvider, AwsSecurityGroupAwareCacheManagerPeerProviderMBean {
 	/**
 	 * Parser for URL's of the form <strong>//HOST:PORT/...</strong>
 	 */
@@ -120,7 +120,8 @@ public class AwsSecurityGroupAwareCacheManagerPeerProvider extends RMICacheManag
     	throw new UnsupportedOperationException();
     }
 
-    public DiscoveryServiceConfig getDiscoveryServiceConfig() {
+    @Override
+	public DiscoveryServiceConfig getDiscoveryServiceConfig() {
 		return discoveryServiceConfig;
 	}
 
@@ -400,6 +401,7 @@ public class AwsSecurityGroupAwareCacheManagerPeerProvider extends RMICacheManag
 	 * Mainly used for testing to retrieve the current list of peer URL's
 	 * @return 
 	 */
+	@Override
 	public Set<String> getPeerUrls() {
 		peerUrlsLock.readLock().lock();
 		

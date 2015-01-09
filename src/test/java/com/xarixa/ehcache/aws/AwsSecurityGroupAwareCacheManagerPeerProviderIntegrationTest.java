@@ -40,8 +40,8 @@ public class AwsSecurityGroupAwareCacheManagerPeerProviderIntegrationTest {
 		CacheManager cacheManager1 = getCacheFromConfiguration("ehcache-1.xml");
 		
 		try {
-			AwsSecurityGroupAwareCacheManagerPeerProvider peerProvider =
-				(AwsSecurityGroupAwareCacheManagerPeerProvider)cacheManager1
+			AwsSecurityGroupAwareCacheManagerPeerProviderMBean peerProvider =
+				(AwsSecurityGroupAwareCacheManagerPeerProviderMBean)cacheManager1
 					.getCacheManagerPeerProvider(AwsSecurityGroupAwareCacheManagerPeerProvider.CACHE_SCHEME);
 				Assert.assertEquals("Unexpected peers list: " + peerProvider.getPeerUrls(),
  						0, peerProvider.getPeerUrls().size());				
