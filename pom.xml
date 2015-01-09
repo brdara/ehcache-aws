@@ -9,21 +9,23 @@
 	<packaging>jar</packaging>
 
 	<properties>
+		<ehcache.version>2.7.1</ehcache.version>
+		<jclouds.version>1.8.1</jclouds.version>
+		<commons-lang.version>3.3.2</commons-lang.version>
 		<slf4j.version>1.7.7</slf4j.version>
 		<jmock.version>2.5.1</jmock.version>
 		<junit.version>4.9</junit.version>
-		
-		<!-- Set to true on the command line to skip the integration tests.
-			An AWS account is required for the integration tests, see below.
-		-->
+		<powermock.version>1.5</powermock.version>
+
+		<!-- Set to true on the command line to skip the integration tests. An 
+			AWS account is required for the integration tests, see below. -->
 		<skipIntegrationTests>false</skipIntegrationTests>
 
-		<!--
-			Set this property on the command line to set up your own properties file which contains
-			accessKey and secretKey to be used in the integration tests.
-			The AwsSecurityGroupAwareDiscoveryServiceIntegrationTest sets up a security group and AWS
-			instances to check that the security group can be read.
-		-->
+		<!-- Set this property on the command line to set up your own properties 
+			file which contains accessKey and secretKey to be used in the integration 
+			tests. The AwsSecurityGroupAwareDiscoveryServiceIntegrationTest sets up a 
+			security group and AWS instances to check that the security group can be 
+			read. -->
 		<awsIdentifyFile>/Work/aws-development.properties</awsIdentifyFile>
 	</properties>
 
@@ -39,68 +41,104 @@
 	</repositories>
 
 	<build>
-		<pluginManagement>
-			<plugins>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-antrun-plugin</artifactId>
-					<version>1.6</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.2</version>
-					<configuration>
-						<source>1.7</source>
-						<target>1.7</target>
-					</configuration>
-				</plugin>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.2</version>
+				<configuration>
+					<source>1.7</source>
+					<target>1.7</target>
+				</configuration>
+			</plugin>
 
-				<!-- Configure surefire to run integration tests in the verify phase 
-					only -->
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-surefire-plugin</artifactId>
-					<version>2.18</version>
-					<configuration>
-						<argLine>-Dcom.xarixa.ehcache.aws.AwsIdentifyFile=${awsIdentifyFile}</argLine>
-					</configuration>
-					<executions>
-						<execution>
-							<id>unit-tests</id>
-							<phase>test</phase>
-							<goals>
-								<goal>test</goal>
-							</goals>
-							<configuration>
-								<skip>${skipUnitTests}</skip>
-								<excludes>
-									<exclude>**/Abstract*IntegrationTest.java</exclude>
-									<exclude>**/*IntegrationTest.java</exclude>
-									<exclude>**/*PerformanceTest.java</exclude>
-								</excludes>
-							</configuration>
-						</execution>
-						<execution>
-							<id>integration-tests</id>
-							<phase>integration-test</phase>
-							<goals>
-								<goal>test</goal>
-							</goals>
-							<configuration>
-								<skip>${skipIntegrationTests}</skip>
-								<excludes>
-									<exclude>**/Abstract*IntegrationTest.java</exclude>
-								</excludes>
-								<includes>
-									<include>**/*IntegrationTest.java</include>
-								</includes>
-							</configuration>
-						</execution>
-					</executions>
-				</plugin>
-			</plugins>
-		</pluginManagement>
+			<!-- Configure surefire to run integration tests in the verify phase only -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.18.1</version>
+				<configuration>
+					<argLine>-Dcom.xarixa.ehcache.aws.AwsIdentifyFile=${awsIdentifyFile}</argLine>
+				</configuration>
+				<executions>
+					<execution>
+						<id>unit-tests</id>
+						<phase>test</phase>
+						<goals>
+							<goal>test</goal>
+						</goals>
+						<configuration>
+							<skip>${skipUnitTests}</skip>
+							<excludes>
+								<exclude>**/*IntegrationTest.class</exclude>
+							</excludes>
+						</configuration>
+					</execution>
+					<execution>
+						<id>integration-tests</id>
+						<phase>integration-test</phase>
+						<goals>
+							<goal>test</goal>
+						</goals>
+						<configuration>
+							<skip>${skipIntegrationTests}</skip>
+							<excludes>
+								<exclude>none</exclude>
+							</excludes>
+							<includes>
+								<include>**/*IntegrationTest.class</include>
+							</includes>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			
+			<!-- Copy all of the dependencies -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<version>2.9</version>
+				<executions>
+					<execution>
+						<id>copy-dependencies</id>
+						<phase>install</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}/jar-dependencies</outputDirectory>
+							<overWriteReleases>false</overWriteReleases>
+							<overWriteSnapshots>false</overWriteSnapshots>
+							<overWriteIfNewer>true</overWriteIfNewer>
+							<scope>runtime</scope>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			
+			<!-- Now create a zip containing the dependencies -->
+	        <plugin>
+	            <groupId>org.apache.maven.plugins</groupId>
+	            <artifactId>maven-assembly-plugin</artifactId>
+	            <version>2.4.1</version>
+	            <configuration>
+	            	<appendAssemblyId>false</appendAssemblyId>
+	            	<finalName>${project.artifactId}-dependencies-${project.version}</finalName>
+	                <descriptors>
+	                    <descriptor>assembly.xml</descriptor>
+	                </descriptors>
+	            </configuration>
+	            <executions>
+		          <execution>
+		            <id>make-assembly</id>
+		            <phase>install</phase>
+		            <goals>
+		              <goal>single</goal>
+		            </goals>
+		          </execution>
+		        </executions>
+	        </plugin>
+		</plugins>
 	</build>
 
 	<dependencies>
@@ -133,13 +171,7 @@
 		<dependency>
 			<groupId>org.powermock</groupId>
 			<artifactId>powermock-reflect</artifactId>
-			<version>1.5</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.carrotsearch</groupId>
-			<artifactId>junit-benchmarks</artifactId>
-			<version>0.7.2</version>
+			<version>${powermock.version}</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -154,36 +186,37 @@
 			<artifactId>slf4j-log4j12</artifactId>
 			<version>${slf4j.version}</version>
 		</dependency>
-		
+
 		<!-- EhCache -->
 		<dependency>
 			<groupId>net.sf.ehcache</groupId>
 			<artifactId>ehcache</artifactId>
-			<version>2.9.0</version>
+			<version>${ehcache.version}</version>
+			<scope>provided</scope>
 		</dependency>
-		
+
 		<!-- Misc -->
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
-			<version>3.3.2</version>
+			<version>${commons-lang.version}</version>
 		</dependency>
-		
+
 		<!-- JClouds -->
 		<dependency>
 			<groupId>org.apache.jclouds</groupId>
 			<artifactId>jclouds-all</artifactId>
-			<version>1.8.1</version>
+			<version>${jclouds.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.jclouds.driver</groupId>
 			<artifactId>jclouds-sshj</artifactId>
-			<version>1.8.1</version>
+			<version>${jclouds.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.jclouds.driver</groupId>
 			<artifactId>jclouds-slf4j</artifactId>
-			<version>1.8.1</version>
+			<version>${jclouds.version}</version>
 		</dependency>
 	</dependencies>
 </project>
